@@ -1,45 +1,80 @@
-"use client"
-import { useState, useEffect, useRef } from "react"
+"use client";
 
+import { useCallback, useEffect, useState } from 'react';
+
+type TimerMode = "Focus" | "Break";
+// time to minutes
+const FocusTime = 0.1;
+const BreakTime = 0.1;
 export default function UseTimer() {
-  const [timeLeft, setTimeLeft] = useState(25 * 60) // 25 minutes in seconds
-  const [isActive, setIsActive] = useState(false) // Start as false, not true
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+    const [mode, setMode] = useState<TimerMode>("Focus")
+    const [timeLeft, setTimeLeft] = useState(
+      mode === "Focus" ? FocusTime * 60 : BreakTime * 60); // minutes in seconds
+    const [isActive, setIsActive] = useState<boolean>(false);
+    const [sessions, setSessions] = useState (0);
 
-  useEffect(() => {
-    if (isActive && timeLeft > 0) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((time) => time - 1)
-      }, 1000)
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
+    const getDuration = useCallback((mode: TimerMode) => {
+        return mode === "Focus" ? FocusTime * 60 : BreakTime * 60; // convert minutes to seconds
+    }, []);
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-  }, [isActive, timeLeft])
+    const toggleTimer = () => {
+        setIsActive((prev) => !prev);
+    };  
+    
+    const resetTimer = () => {
+        setTimeLeft(getDuration(mode));
+        setIsActive(false);
+    };
 
-  const toggleTimer = () => {
-    setIsActive(!isActive)
-  }
+    const switchMode = useCallback(() => {
+        const newMode = mode === "Focus" ? "Break" : "Focus";
+        setMode(newMode);
+        setTimeLeft(getDuration(newMode));
+        setIsActive(false); // Reset active state when switching modes
 
-  const resetTimer = () => {
-    setIsActive(false)
-    setTimeLeft(25 * 60)
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-    }
-  }
+        // increment sessions
+
+        if (mode === "Focus") {
+            setSessions((prev) => prev + 1);
+        }
+
+    }, [mode, getDuration]);
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+        if (isActive) {
+            interval = setInterval(() => {
+                setTimeLeft((prev) => {
+                    if (prev <= 0) {
+                        // Optionally, you can pause or reset here
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isActive, mode]);
+
+    //auto-switch mode when timeLeft reaches 0
+    useEffect(() => {
+        if (timeLeft === 0) {
+            switchMode();
+        }
+    }, [timeLeft, switchMode]); 
 
   return {
+    mode,
+    setMode,
     timeLeft,
+    setTimeLeft,
     toggleTimer,
-    resetTimer,
     isActive,
-  }
+    resetTimer,
+    switchMode,
+    sessions,
+    setSessions,
+  };
 }
