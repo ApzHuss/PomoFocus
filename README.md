@@ -23,6 +23,8 @@ Simple state management with React
 
 - Tailwind CSS
 
+- Shadcn UI
+
 - React Hooks
 
 -  Audio (for end sound)
