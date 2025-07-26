@@ -1,69 +1,88 @@
-"use client";
+"use client"
+import { useCallback, useEffect, useState } from "react"
 
-import { useCallback, useEffect, useState } from 'react';
+type TimerMode = "Focus" | "Break"
 
-type TimerMode = "Focus" | "Break";
 // time to minutes
-const FocusTime = 0.1;
-const BreakTime = 0.1;
+const FocusTime = 0.1
+const BreakTime = 5
+
 export default function UseTimer() {
-    const [mode, setMode] = useState<TimerMode>("Focus")
-    const [timeLeft, setTimeLeft] = useState(
-      mode === "Focus" ? FocusTime * 60 : BreakTime * 60); // minutes in seconds
-    const [isActive, setIsActive] = useState<boolean>(false);
-    const [sessions, setSessions] = useState (0);
+  const [mode, setMode] = useState<TimerMode>("Focus")
+  const [timeLeft, setTimeLeft] = useState(mode === "Focus" ? FocusTime * 60 : BreakTime * 60) // minutes in seconds
+  const [isActive, setIsActive] = useState<boolean>(false)
+  const [sessions, setSessions] = useState(0)
 
-    const getDuration = useCallback((mode: TimerMode) => {
-        return mode === "Focus" ? FocusTime * 60 : BreakTime * 60; // convert minutes to seconds
-    }, []);
+  const getDuration = useCallback((mode: TimerMode) => {
+    return mode === "Focus" ? FocusTime * 60 : BreakTime * 60 // convert minutes to seconds
+  }, [])
 
-    const toggleTimer = () => {
-        setIsActive((prev) => !prev);
-    };  
-    
-    const resetTimer = () => {
-        setTimeLeft(getDuration(mode));
-        setIsActive(false);
-    };
+  const playNotificationSound = useCallback(() => {
+    try {
+      const audio = new Audio("/ringtone.mp3")
+      audio.volume = 0.5 // Set volume to 50%
+      audio.play().catch((e) => {
+        console.error("Error playing notification sound:", e)
+      })
+    } catch (error) {
+      console.error("Error creating audio:", error)
+    }
+  }, [])
 
-    const switchMode = useCallback(() => {
-        const newMode = mode === "Focus" ? "Break" : "Focus";
-        setMode(newMode);
-        setTimeLeft(getDuration(newMode));
-        setIsActive(false); // Reset active state when switching modes
+  const toggleTimer = () => {
+    setIsActive((prev) => !prev)
+  }
 
-        // increment sessions
+  const resetTimer = () => {
+    setTimeLeft(getDuration(mode))
+    setIsActive(false)
+  }
 
-        if (mode === "Focus") {
-            setSessions((prev) => prev + 1);
-        }
+  const switchMode = useCallback(() => {
+    const newMode = mode === "Focus" ? "Break" : "Focus"
+    setMode(newMode)
+    setTimeLeft(getDuration(newMode))
+    setIsActive(false) // Reset active state when switching modes
 
-    }, [mode, getDuration]);
+    // increment sessions
+    if (mode === "Focus") {
+      setSessions((prev) => prev + 1)
+    }
+  }, [mode, getDuration])
 
-    useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
-        if (isActive) {
-            interval = setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev <= 0) {
-                        // Optionally, you can pause or reset here
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [isActive, mode]);
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
 
-    //auto-switch mode when timeLeft reaches 0
-    useEffect(() => {
-        if (timeLeft === 0) {
-            switchMode();
-        }
-    }, [timeLeft, switchMode]); 
+    if (isActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            // Timer is about to finish
+            setIsActive(false)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isActive, timeLeft])
+
+  // Auto-switch mode when timeLeft reaches 0
+  useEffect(() => {
+    if (timeLeft === 0 && !isActive) {
+      // Play notification sound
+      playNotificationSound()
+
+      // Switch mode after a short delay to ensure sound plays
+      setTimeout(() => {
+        switchMode()
+      }, 100)
+    }
+  }, [timeLeft, isActive, switchMode, playNotificationSound])
 
   return {
     mode,
@@ -76,5 +95,5 @@ export default function UseTimer() {
     switchMode,
     sessions,
     setSessions,
-  };
+  }
 }
