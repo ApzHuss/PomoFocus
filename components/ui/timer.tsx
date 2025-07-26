@@ -1,4 +1,5 @@
-"use client"
+"use client"; 
+
 import { Button } from "./button"
 import UseTimer from "@/hooks/use-timer"
 import { Play, Pause, RotateCcw, ArrowLeftRight } from "lucide-react"

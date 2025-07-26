@@ -1,10 +1,11 @@
-"use client"
+"use client";
+
 import { useCallback, useEffect, useState } from "react"
 
 type TimerMode = "Focus" | "Break"
 
 // time to minutes
-const FocusTime = 0.1
+const FocusTime = 25
 const BreakTime = 5
 
 export default function UseTimer() {
