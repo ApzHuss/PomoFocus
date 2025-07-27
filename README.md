@@ -1,7 +1,9 @@
 <img src="/public/bg.png" 
 alt="Apzhuss - Abdisalaan H. Abdi..">
 
+
 📌 Pomodoro Timer App ⏳
+
 A sleek and minimal Pomodoro Timer App built using Next.js and Tailwind CSS.
 This app helps you stay focused and boost productivity by using the Pomodoro technique — working in intervals with scheduled breaks.
 
