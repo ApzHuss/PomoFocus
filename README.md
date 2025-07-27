@@ -7,7 +7,7 @@ alt="Apzhuss - Abdisalaan H. Abdi..">
 A sleek and minimal Pomodoro Timer App built using Next.js and Tailwind CSS.
 This app helps you stay focused and boost productivity by using the Pomodoro technique — working in intervals with scheduled breaks.
 
-✅ Features
+## ⚙️Features
 
 - Start, pause, and reset timer
 
@@ -15,11 +15,11 @@ This app helps you stay focused and boost productivity by using the Pomodoro tec
 
 - Notification sound when the timer ends 🔔
 
-Responsive, clean UI (Tailwind CSS)
+- Responsive, clean UI (Tailwind CSS)
 
-Simple state management with React
+- Simple state management with React
 
-🚀 Tech Stack
+## 🚀 Tech Stack
 
 - Next.js
 
